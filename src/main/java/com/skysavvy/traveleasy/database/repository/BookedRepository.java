@@ -18,20 +18,21 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-
 @Tag(name = "Booked API")
-@Repository
+@RepositoryRestResource(path = "bookings", collectionResourceRel = "bookings")
 public interface BookedRepository extends JpaRepository<Booked, Long> {
-    List<Booked> findAllByUser(User user, Sort sort);
 
-    List<Booked> findAllByUser(User user);
+    // Questo sarà accessibile via: GET /bookings/search/findAllByUser?user=userId
+    @RestResource(path = "findAllByUser", rel = "findAllByUser")
+    @Query(value = "SELECT b FROM Booked b WHERE b.user.id = :user")
+    List<Booked> findAllByUser(@Param("user") Long user, Sort sort);
 
+    @RestResource(exported = false)
     void deleteBookedById(Long bookId);
 
-    List<Booked> findAllByUserOrderByDateAsc(User user);
 
-    List<Booked> findAllByUserOrderByDateDesc(User user);
-
-    @Query(value = "SELECT b FROM Booked b WHERE b.date >= :range AND b.user = :user")
-    List<Booked> findAllFromRangeByUser(@Param("range") Date range, @Param("user") User user,  Sort sort);
+    @RestResource(path= "findAllFromRangeByUser", rel ="findAllFromRangeByUser")
+    @Query(value = "SELECT b FROM Booked b WHERE b.date >= :range AND b.user.id = :user")
+    List<Booked> findAllFromRangeByUserId(@Param("range")
+                                          @DateTimeFormat(pattern= "yyyy-MM-dd")Date range, @Param("user") Long user, Sort sort);
 }

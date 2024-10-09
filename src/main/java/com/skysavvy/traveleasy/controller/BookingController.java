@@ -20,12 +20,12 @@ public class BookingController {
     BookingService bookingService;
 
 
-   @Operation(summary = "Get a list of flight bookings", description = "Return a list of Booked")
+  /* @Operation(summary = "Get a list of flight bookings", description = "Return a list of Booked")
     @GetMapping
     public List<Booked> getBookings(@RequestHeader("Authorization") String tokenUser,
                                     @Parameter(description = "Order of bookings", example = "ASC", required = true) @RequestParam String sort) throws ResponseException {
         return bookingService. getAllPublicBookings(tokenUser, sort);
-    }
+    }*/
 
     @DeleteMapping("/{id}")
     public void deleteBooking(@RequestHeader("Authorization") String tokenUser,
@@ -33,12 +33,12 @@ public class BookingController {
         bookingService.deleteBooking(bookingId);
     }
 
-    @GetMapping("/range")
+    /*@GetMapping("/range")
     public List <Booked> getBookingsInRange(@RequestHeader("Authorization") String tokenUser,
                                             @RequestParam String range,
                                             @RequestParam String sort) throws ResponseException {
         return bookingService.getBookingsFromRange(tokenUser, range, sort);
-    }
+    }*/
 
 
 }

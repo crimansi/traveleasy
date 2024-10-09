@@ -34,7 +34,7 @@ public class BookingService {
         booked.setDate(today);
         bookedRepository.save(booked);
     }
-    public List<Booked> getAllPublicBookings(String tokenUser, String sort) {
+    /*public List<Booked> getAllPublicBookings(String tokenUser, String sort) {
         User user = findUser(tokenUser);
         if(sort.isEmpty())
             return bookedRepository.findAllByUser(user);
@@ -42,7 +42,7 @@ public class BookingService {
             Sort sortBooked = Sort.by(Sort.Direction.fromString(sort), "date");
             return bookedRepository.findAllByUser(user, sortBooked);
         }
-    }
+    }*/
 
     @Transactional
     public void deleteBooking(Long bookingId) {
@@ -64,7 +64,7 @@ public class BookingService {
         } else throw new IllegalArgumentException("Booking not found");
     }
 
-    public List<Booked> getBookingsFromRange(String tokenUser, String range, String sort) {
+   /* public List<Booked> getBookingsFromRange(String tokenUser, String range, String sort) {
         User user = findUser(tokenUser);
         Sort sortBooked = Sort.by(Sort.Direction.fromString(sort), "date");
         if("oneWeekAgo".equalsIgnoreCase(range)) {
@@ -84,7 +84,7 @@ public class BookingService {
         Calendar calendar = Calendar.getInstance();
         calendar.add(field, offset);
         return calendar.getTime();
-    }
+    }*/
 
     private User findUser(String tokenUser){
         if(userRepository.findByUsername(jwtUtils.getUsernameFromToken(tokenUser)).isPresent())
