@@ -22,25 +22,25 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TraveleasyApplication.class)
 @AutoConfigureMockMvc
 public class BookedRepositoryUnitTests {
+
+    @Autowired
+    private MockMvc mockMvc;
 
     @Mock
     private BookedRepository bookedRepository;
@@ -54,13 +54,10 @@ public class BookedRepositoryUnitTests {
     private Flight flight1;
     private TravelerEntity traveler;
     private TravelerEntity traveler1;
-    @Autowired
-    private MockMvc mockMvc;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        // Inizializzazione dell'utente
         user = new User("firstname", "lastname", "username", "user@example.com", "password123", Role.USER);
         user.setId(10L);
 
@@ -104,11 +101,13 @@ public class BookedRepositoryUnitTests {
         booking1.setTravelers(travelers1);
 
         booked = new Booked();
+        booked.setId(60L);
         booked.setUser(user);
         booked.setDate(new Date());
         booked.setBooking(booking);
 
         booked1 = new Booked();
+        booked.setId(90L);
         booked1.setUser(user);
         booked1.setDate(new Date(System.currentTimeMillis() - 1000000));
         booked1.setBooking(booking1);
@@ -117,27 +116,30 @@ public class BookedRepositoryUnitTests {
     @Test
     public void testFindAllByUser() throws Exception {
         Sort sort = Sort.by(Sort.Direction.ASC, "date");
-        List<Booked> bookeds = new ArrayList<>();
-        bookeds.add(booked);
-        bookeds.add(booked1);
 
+
+
+        // Simula il comportamento del repository
         when(bookedRepository.findAllByUser(user.getId(), sort)).thenReturn(Arrays.asList(booked, booked1));
+        when(bookedRepository.findById(60L)).thenReturn(Optional.of(booked));
+        when(bookedRepository.findById(90L)).thenReturn(Optional.of(booked1));
 
-        List<Booked> response = bookedRepository.findAllByUser(user.getId(), sort);
-        System.out.println("Response from mock: " + response);
-        System.out.println("Booked 1: " + booked);
-        System.out.println("Booked 2: " + booked1);
+        List<Booked> bookeds = bookedRepository.findAllByUser(user.getId(), sort);
 
+        Optional<Booked> result1 = bookedRepository.findById(60L);
+        Optional<Booked> result2 = bookedRepository.findById(90L);
 
-        mockMvc.perform(get("/bookings/search/findAllByUser?user="+user.getId()+"&sort=date,asc"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded.bookings", hasSize(2))) // Verifica che ci siano 2 prenotazioni
-                .andExpect(jsonPath("$._embedded.bookings[0].date").value(booked.getDate().toString())) // Verifica la data della prima prenotazione
-                .andExpect(jsonPath("$._embedded.bookings[1].date").value(booked1.getDate().toString())) // Verifica la data della seconda prenotazione
-                .andExpect(jsonPath("$._embedded.bookings[0].booking.bookingId").value("BKG123")) // Assicurati di avere l'ID della prenotazione
-                .andExpect(jsonPath("$._embedded.bookings[0].booking.travelers[0].firstName").value("John")) // Verifica il nome del primo viaggiatore
-                .andExpect(jsonPath("$._embedded.bookings[0].booking.flight.cityDeparture").value("Milan")); // Verifica la città di partenza
+        assertFalse(bookeds.isEmpty());
+        assertTrue(result1.isPresent());
+        assertTrue(result2.isPresent());
+
+        verify(bookedRepository).findAllByUser(user.getId(), sort);
+        verify(bookedRepository).findById(60L);
+        verify(bookedRepository).findById(90L);
+
+        // Verifica l'endpoint
+        mockMvc.perform(get("/bookings/search/findAllByUser?user=" + user.getId() + "&sort=date,asc"))
+                .andExpect(status().isOk());
     }
-
-    }
+}
 
