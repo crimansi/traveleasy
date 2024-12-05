@@ -29,7 +29,7 @@ public interface BookedRepository extends JpaRepository<Booked, Long> {
     List<Booked> findAllByUser(@Param("user") Long user, Sort sort);
 
     @RestResource(exported = false)
-    void deleteBookedById(Long bookId);
+    void saveBooked(Booked booked);
 
 
     @RestResource(path= "findAllFromRangeByUser", rel ="findAllFromRangeByUser")
